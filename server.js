@@ -12,7 +12,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
-
+console.log('Firebase initialized successfully');
 const bucket = admin.storage().bucket();
 
 const app = express();
