@@ -18,6 +18,11 @@ const bucket = admin.storage().bucket();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  optionsSuccessStatus: 200
+};
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -35,7 +40,7 @@ const upload = multer({
 });
 
 // Conexión a MongoDB (asegúrate de usar la URL de conexión proporcionada por Railway)
-mongoose.connect(process.env.MONGODB_URL)
+mongoose.connect(process.env.MONGO_PUBLIC_URL)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('Error connecting to MongoDB', err));
 
@@ -60,7 +65,10 @@ app.get('/api/menu', async (req, res) => {
 });
 
 app.post('/api/menu', upload.single('imagen'), async (req, res, next) => {
+  console.log('Received POST request to /api/menu');
   try {
+    console.log('Request body:', req.body);
+    console.log('File:', req.file);
     const { nombre, descripcion, precio } = req.body;
 
     if (!nombre || !descripcion || !precio) {
@@ -92,6 +100,7 @@ app.post('/api/menu', upload.single('imagen'), async (req, res, next) => {
       res.status(201).json(nuevoPlato);
     }
   } catch (error) {
+    console.error('Error in POST /api/menu:', error);
     next(error);
   }
 });
