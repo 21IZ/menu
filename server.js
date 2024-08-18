@@ -8,6 +8,11 @@ const { v4: uuidv4 } = require('uuid');
 
 // Configuración de Firebase
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+console.log('Initializing Firebase with:', {
+  projectId: serviceAccount.project_id,
+  clientEmail: serviceAccount.client_email,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+});
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
@@ -55,6 +60,18 @@ const menuItemSchema = new mongoose.Schema({
 const MenuItem = mongoose.model('MenuItem', menuItemSchema);
 
 // Rutas
+app.get('/test-firebase', async (req, res) => {
+  try {
+    const bucket = admin.storage().bucket();
+    const [files] = await bucket.getFiles({ maxResults: 1 });
+    res.json({ success: true, message: 'Firebase connection successful', fileCount: files.length });
+  } catch (error) {
+    console.error('Firebase test error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+
 app.get('/api/menu', async (req, res) => {
   try {
     const items = await MenuItem.find();
