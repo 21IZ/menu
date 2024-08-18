@@ -18,7 +18,12 @@ admin.initializeApp({
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 console.log('Firebase initialized successfully');
-const bucket = admin.storage().bucket();
+console.log('Firebase config:', JSON.stringify({
+  projectId: admin.app().options.projectId,
+  storageBucket: admin.app().options.storageBucket
+}, null, 2));
+const bucket = admin.storage().bucket(process.env.FIREBASE_STORAGE_BUCKET);
+console.log('Bucket name:', process.env.FIREBASE_STORAGE_BUCKET);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -135,7 +140,10 @@ app.put('/api/menu/:id', upload.single('imagen'), async (req, res, next) => {
         },
       });
 
-      blobStream.on('error', (err) => next(err));
+      blobStream.on('error', (err) => {
+        console.error('Error en blobStream:', err);
+        next(err);
+      });
 
       blobStream.on('finish', async () => {
         imagen = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
@@ -145,8 +153,9 @@ app.put('/api/menu/:id', upload.single('imagen'), async (req, res, next) => {
         );
         if (!item) return res.status(404).json({ message: 'Ítem no encontrado' });
         res.json(item);
+        console.log('Subida de archivo completada');
       });
-
+      console.log('Iniciando subida de archivo');
       blobStream.end(req.file.buffer);
     } else {
       const item = await MenuItem.findByIdAndUpdate(req.params.id, 
