@@ -109,7 +109,7 @@ app.post('/api/menu', upload.single('imagen'), async (req, res, next) => {
       blobStream.on('error', (err) => next(err));
 
       blobStream.on('finish', async () => {
-        imagen = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        imagen = `https://firebasestorage.googleapis.com/${bucket.name}/${blob.name}`;
         const nuevoPlato = new MenuItem({ nombre, descripcion, precio, imagen });
         await nuevoPlato.save();
         res.status(201).json(nuevoPlato);
