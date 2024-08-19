@@ -109,7 +109,13 @@ app.post('/api/menu', upload.single('imagen'), async (req, res, next) => {
       blobStream.on('error', (err) => next(err));
 
       blobStream.on('finish', async () => {
-        imagen = `https://firebasestorage.googleapis.com/${bucket.name}/${blob.name}`;
+        // Generate a signed URL that doesn't expire
+        const [url] = await blob.getSignedUrl({
+          action: 'read',
+          expires: '03-09-2491'  // This is effectively never expiring
+        });
+        imagen = url;
+        console.log('Image URL:', imagen);
         const nuevoPlato = new MenuItem({ nombre, descripcion, precio, imagen });
         await nuevoPlato.save();
         res.status(201).json(nuevoPlato);
